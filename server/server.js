@@ -62,7 +62,19 @@ app.get('/api/planets', async (req, res) => {
     }
 });
 
-
+app.get('/api/characters/:id', async (req, res) => {
+    try {
+        const {id} = req.params;
+        const client = await MongoClient.connect(url);
+        const db = client.db(dbName);
+        const collection = db.collection(charactersCollection);
+        const character = await collection.findOne({id: +id });
+        res.json(character);
+    } catch (err) {
+        console.error('Error: ', err);
+        res.status(500).send("Error getting characters");
+    }
+});
 
 
 
