@@ -114,6 +114,28 @@ app.get('/api/planets/:id', async (req, res) => {
     }
 });
 
+app.get('/api/planets/:id/films', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const client = await MongoClient.connect(url);
+        const db = client.db(dbName);
+        const fpcollection = db.collection(filmsPlanetsCollection);
+        const pCollection = db.collection(PlanetsCollection);
+        const planet = await pCollection.findOne({id: +id});
+        const filmsWithPlanet = await fpcollection.find({planet_id: +id}).toArray();
+        let films = [];
+        for(let film of filmsWithPlanet) {
+            const fCollection = db.collection(filmsCollection);
+            const getOneFilm = await fCollection.findOne({id: +film.film_id});
+            films.push(getOneFilm);
+        }
+        res.json({planet, films});
+    } catch (err) {
+        console.error('Error: ', err);
+        res.status(500).send("Error getting planet");
+    }
+});
+
 
 app.get('/api/characters/:id', async (req, res) => {
     try {
