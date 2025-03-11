@@ -3,7 +3,8 @@ import { MongoClient, ObjectId } from 'mongodb';
 
 const url = 'mongodb://localhost:27017';
 const dbName = 'swapi';
-const CharactersCollection = 'characters';
+const charactersCollection = 'characters';
+const filmsCollection = 'films';
 
 const app = express();
 const PORT = 3000;
@@ -21,9 +22,22 @@ app.get('/api/characters', async (req, res) => {
     try {
         const client = await MongoClient.connect(url);
         const db = client.db(dbName);
-        const collection = db.collection(CharactersCollection);
+        const collection = db.collection(charactersCollection);
         const characters = await collection.find({}).toArray();
         res.json(characters);
+    } catch (err) {
+        console.error('Error: ', err);
+        res.status(500).send("Error getting characters");
+    }
+});
+
+app.get('/api/films', async (req, res) => {
+    try {
+        const client = await MongoClient.connect(url);
+        const db = client.db(dbName);
+        const collection = db.collection(filmsCollection);
+        const films = await collection.find({}).toArray();
+        res.json(films);
     } catch (err) {
         console.error('Error: ', err);
         res.status(500).send("Error getting characters");
