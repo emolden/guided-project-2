@@ -130,7 +130,24 @@ app.get('/api/characters/:id', async (req, res) => {
 });
 
 
+app.get('/api/characters/:id/films', async (req, res) => {
+    try {
+        const {id} = req.params;
+        const client = await MongoClient.connect(url);
+        const db = client.db(dbName);
+        const charactersCollection = db.collection('characters');
+        const filmsCharactersCollection = db.collection('films_characters');
+        const filmsCollection = db.collection('films');
+        const character = await charactersCollection.findOne({ id: +id });
+        const filmRelations = await filmsCharactersCollection.find({ character_id: +id }).toArray();
+        const filmIds = filmRelations.map(relation => relation.film_id);                                                                                 
 
+        res.json({character, filmRelations});
+    } catch (err) {
+        console.error('Error: ', err);
+        res.status(500).send("Error getting characters");
+    }
+});
 
 
 app.listen(PORT, () => {
