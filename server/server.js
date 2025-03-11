@@ -6,6 +6,8 @@ const dbName = 'swapi';
 const charactersCollection = 'characters';
 const filmsCollection = 'films';
 const PlanetsCollection = 'planets';
+const filmsCharactersCollection = 'films_characters';
+const filmsPlanetsCollection = 'films_planets';
 
 
 const app = express();
@@ -58,6 +60,27 @@ app.get('/api/films/:id', async (req, res) => {
     } catch (err) {
         console.error('Error: ', err);
         res.status(500).send("Error getting film");
+    }
+});
+app.get('/api/films/:id/planets', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const client = await MongoClient.connect(url);
+        const db = client.db(dbName);
+        const fpcollection = db.collection(filmsPlanetsCollection);
+        const fCollection = db.collection(filmsCollection);
+        const film = await fCollection.findOne({id: +id});
+        const planetsInFilm = await fpcollection.find({film_id: +id}).toArray();
+        let planets = [];
+        for(let planet of planetsInFilm) {
+            const pCollection = db.collection(PlanetsCollection);
+            const getOnePlanet = await pCollection.findOne({id: +planet.planet_id});
+            planets.push(getOnePlanet);
+        }
+        res.json({film, planets});
+    } catch (err) {
+        console.error('Error: ', err);
+        res.status(500).send("Error getting planets for film");
     }
 });
 
