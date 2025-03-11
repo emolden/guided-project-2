@@ -5,18 +5,20 @@ const url = 'mongodb://localhost:27017';
 const dbName = 'swapi';
 const charactersCollection = 'characters';
 const filmsCollection = 'films';
+const PlanetsCollection = 'planets';
+
 
 const app = express();
 const PORT = 3000;
 app.use(express.json());
 
-const planets = [
-    {"id": 1, "name": "Pluton"},
-    {"id": 2, "name": "Earth"},
-]
-app.get('/api/planets', (req, res) => {
-res.json(planets);
-})
+// const planets = [
+//     {"id": 1, "name": "Pluton"},
+//     {"id": 2, "name": "Earth"},
+// ]
+// app.get('/api/planets', (req, res) => {
+// res.json(planets);
+// })
 
 app.get('/api/characters', async (req, res) => {
     try {
@@ -31,6 +33,7 @@ app.get('/api/characters', async (req, res) => {
     }
 });
 
+
 app.get('/api/films', async (req, res) => {
     try {
         const client = await MongoClient.connect(url);
@@ -44,6 +47,20 @@ app.get('/api/films', async (req, res) => {
     }
 });
 
+
+
+app.get('/api/planets', async (req, res) => {
+    try {
+        const client = await MongoClient.connect(url);
+        const db = client.db(dbName);
+        const collection = db.collection(PlanetsCollection);
+        const planets = await collection.find({}).toArray();
+        res.json(planets);
+    } catch (err) {
+        console.error('Error: ', err);
+        res.status(500).send("Error getting planets");
+    }
+});
 
 
 
