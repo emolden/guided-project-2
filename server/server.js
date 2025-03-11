@@ -47,6 +47,20 @@ app.get('/api/films', async (req, res) => {
     }
 });
 
+app.get('/api/films/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const client = await MongoClient.connect(url);
+        const db = client.db(dbName);
+        const collection = db.collection(filmsCollection);
+        const film = await collection.findOne({id: +id});
+        res.json(film);
+    } catch (err) {
+        console.error('Error: ', err);
+        res.status(500).send("Error getting characters");
+    }
+});
+
 
 
 app.get('/api/planets', async (req, res) => {
