@@ -43,7 +43,7 @@ app.get('/api/films', async (req, res) => {
         res.json(films);
     } catch (err) {
         console.error('Error: ', err);
-        res.status(500).send("Error getting characters");
+        res.status(500).send("Error getting films");
     }
 });
 
@@ -57,7 +57,7 @@ app.get('/api/films/:id', async (req, res) => {
         res.json(film);
     } catch (err) {
         console.error('Error: ', err);
-        res.status(500).send("Error getting characters");
+        res.status(500).send("Error getting film");
     }
 });
 
@@ -73,6 +73,20 @@ app.get('/api/planets', async (req, res) => {
     } catch (err) {
         console.error('Error: ', err);
         res.status(500).send("Error getting planets");
+    }
+});
+
+app.get('/api/planets/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const client = await MongoClient.connect(url);
+        const db = client.db(dbName);
+        const collection = db.collection(PlanetsCollection);
+        const planet = await collection.findOne({id: +id});
+        res.json(planet);
+    } catch (err) {
+        console.error('Error: ', err);
+        res.status(500).send("Error getting planet");
     }
 });
 
