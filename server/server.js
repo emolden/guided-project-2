@@ -1,5 +1,6 @@
 import express from 'express';
 import { MongoClient, ObjectId } from 'mongodb';
+import cors from 'cors';
 
 const url = 'mongodb://localhost:27017';
 const dbName = 'swapi';
@@ -11,6 +12,7 @@ const filmsPlanetsCollection = 'films_planets';
 
 
 const app = express();
+app.use(cors());
 const PORT = 3000;
 app.use(express.json());
 
