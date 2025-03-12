@@ -197,17 +197,19 @@ app.get('/api/planets/:id/films', async (req, res) => {
 
 app.get('/api/planets/:id/characters', async (req, res) => {
     try{
-
+        const { id } = req.params;
+        const client = await MongoClient.connect(url);
+        const db = client.db(dbName);
+        const cCollection = db.collection(charactersCollection);
+        const pCollection = db.collection(PlanetsCollection);
+        const planet = await pCollection.findOne({id: +id});
+        const charactersFromPlanet = await cCollection.find({homeworld: +id}).toArray();
+        res.json({planet, charactersFromPlanet});
     } catch (err) {
         console.error('Error: ', err);
         res.status(500).send("Error getting characters based on planet");
     }
 })
-
-
-
-
-
 
 
 app.listen(PORT, () => {
