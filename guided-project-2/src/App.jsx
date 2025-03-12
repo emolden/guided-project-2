@@ -1,11 +1,20 @@
 import { useState, useEffect } from 'react'
 import './App.css'
+import Home from './components/Home';
+import CharacterById from './components/CharacterById';
+import {
+  BrowserRouter as Router,
+  Route,
+  Routes,
+  Link
+} from "react-router-dom";
 
 function App() {
   const [characters, setCharacters] = useState(null)
   const [films, setFilms] = useState(null)
   const [planets, setPlanets] = useState(null)
   const [characterById, setCharacterById] = useState(null)
+
 
   useEffect (() => {
     const fetchCharacters = async ()=> { 
@@ -78,12 +87,13 @@ function App() {
   );
   return (
     <>
-      <h1>Characters</h1>
-      <ul>
-        {
-          characters.map((char) => ( <li key={char._id}>{char.name}</li>))
-        }
-        </ul>
+      <Router>
+        <h1>Characters</h1>
+          <Routes>
+            <Route exact path = "/" element={<Home characters={characters}/>} />
+            <Route path = "/:id" element={<CharacterById />} />
+          </Routes>
+      </Router>
     </>
   )
 }
