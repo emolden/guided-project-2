@@ -131,23 +131,59 @@ app.get('/api/characters/:id', async (req, res) => {
 
 
 app.get('/api/characters/:id/films', async (req, res) => {
-    try {
+
         const {id} = req.params;
         const client = await MongoClient.connect(url);
-        const db = client.db(dbName);
-        const charactersCollection = db.collection('characters');
-        const filmsCharactersCollection = db.collection('films_characters');
-        const filmsCollection = db.collection('films');
-        const character = await charactersCollection.findOne({ id: +id });
-        const filmRelations = await filmsCharactersCollection.find({ character_id: +id }).toArray();
-        const filmIds = filmRelations.map(relation => relation.film_id);                                                                                 
-
-        res.json({character, filmRelations});
-    } catch (err) {
-        console.error('Error: ', err);
-        res.status(500).send("Error getting characters");
-    }
-});
+        const db = client.db(dbName);                                                                                
+        const agg = [
+            {
+              '$match': {
+                'id': +id
+              }
+            }, {
+              '$lookup': {
+                'from': 'films_characters', 
+                'localField': 'id', 
+                'foreignField': 'character_id', 
+                'as': 'films_characters'
+              }
+            }, {
+              '$project': {
+                'id': 1, 
+                'name': 1, 
+                'film_id': '$films_characters.film_id'
+              }
+            }, {
+              '$unwind': {
+                'path': '$film_id'
+              }
+            }, {
+              '$lookup': {
+                'from': 'films', 
+                'localField': 'film_id', 
+                'foreignField': 'id', 
+                'as': 'films'
+              }
+            }, {
+              '$unwind': {
+                'path': '$films'
+              }
+            }, {
+              '$project': {
+                'id': 1, 
+                'name': 1, 
+                'film_id': '$films.id', 
+                'film_title': '$films.title'
+              }
+            }
+          ];
+        
+          const coll = client.db('swapi').collection('characters');
+          const cursor = coll.aggregate(agg);
+          const result = await cursor.toArray();
+          await client.close();
+          res.json(result);
+    });
 
 
 app.listen(PORT, () => {
